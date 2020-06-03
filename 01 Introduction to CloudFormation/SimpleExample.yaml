@@ -3,7 +3,21 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      ImageId: ami-467ca739 # Amazon Linux AMI in N.Virginia
+      ImageId: ami-008c6427c8facbe08  # Amazon Linux AMI in N.Virginia
+      SecurityGroups:
+          !Ref MySecurityGroup
       Tags:
-        - Key: Name
-          Value: A simple example
+        - Key: "Name"
+          Value: !Join 
+            - ""
+            - - "EC2 Instance for "
+              !Ref AWS::Region
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable ssh via port 22
+      SecurityGroupIngress:
+        IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
