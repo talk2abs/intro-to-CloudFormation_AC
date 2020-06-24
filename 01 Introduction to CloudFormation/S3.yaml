@@ -1,5 +1,5 @@
 Resources:
- CylockS3Bucket:
+  CylockS3Bucket:
     Type: AWS::S3::Bucket
     Properties: 
       AccessControl: PublicRead 
@@ -12,7 +12,7 @@ Resources:
        IndexDocument: index.html
       Tags:
         - Key: Name
-          Value: !Join [ "", [EC2, Instane, with, fn ,join ] ] 
+          Value: !Join [ "", [Cylock, S3, Bucket ] ]   
   MySecurityGroup:
    paramName:
      Description: For static website

@@ -7,19 +7,29 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
 Mappings:
   RegionMap:
-    us-east-1:
-      AMI: ami-1853ac65
-    us-west-1:
-      AMI: ami-bf5540df
-    eu-west-1:
-      AMI: ami-3bfab942
-    ap-southeast-1:
-      AMI: ami-e2adf99e
-    ap-southeast-2:
-      AMI: ami-43874721
+    us-west-2:
+      AMI: ami-008c6427c8facbe08
+    
 Resources:
-  Ec2Instance:
-    Type: 'AWS::EC2::Instance'
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::Cloudformation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+              php: []
+          files:
+            /var/www/html/index.php:
+              content: !Sub |
+               <?php print "Hello world ABS was here!"; ?>
+          services:
+            sysvinit:
+              httpd:
+               enable: true
+               ensureRunning: true
+                
     Properties:
       InstanceType: t2.micro
       ImageId:
@@ -27,12 +37,20 @@ Resources:
         - RegionMap
         - !Ref AWS::Region
         - AMI
-      SecurityGroups: 
+      SecurityGroupIds: 
         - !Ref MySecurityGroup
       Tags:
         - Key: "Name"
           Value: !Ref NameOfService
       KeyName: !Ref KeyName
+      UserData:
+        'Fn::Base64': 
+          !Sub |
+            #!/bin/bash -xe            
+            # Ensure AWS CFN Bootstrap is the latest
+            yum install -y aws-cfn-bootstrap
+            # Install the files and packages from the metadata
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance  --region ${AWS::Region}  
   MySecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -42,8 +60,12 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0  
 Outputs:
-  ServerDns:
-    Value: !GetAtt
-      - Ec2Instance
-      - PublicDnsName
+  Website:
+    Description: The Public DNS for the EC2 Instance
+    Value: !Sub 'http://${EC2Instance.PublicDnsName}' 
+

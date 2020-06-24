@@ -10,6 +10,8 @@ Mappings:
       AMI: ami-e2adf99e
     ap-southeast-2:
       AMI: ami-43874721
+    us-west-2:
+      AMI: ami-008c6427c8facbe08
 Resources:
   Ec2Instance:
     Type: 'AWS::EC2::Instance'
